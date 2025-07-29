@@ -1,0 +1,41 @@
+msgid "Plugin Name"
+msgstr "AI Translator"
+
+msgid "Description"
+msgstr "A WordPress plugin that uses Translator API to translate content."
+
+msgid "Version"
+msgstr "1.0"
+
+msgid "Author"
+msgstr "milindmore22"
+
+msgid "License"
+msgstr "GPL2"
+
+msgid "License URI"
+msgstr "https://www.gnu.org/licenses/gpl-2.0.html"
+
+msgid "Text Domain"
+msgstr "ai-translator"
+
+msgid "Domain Path"
+msgstr "/languages"
+
+msgid "Requires at least"
+msgstr "5.0"
+
+msgid "Requires PHP"
+msgstr "7.2"
+
+msgid "Select Language"
+msgstr "Select Language"
+
+msgid "Translate"
+msgstr "Translate"
+
+msgid "Translation successful"
+msgstr "Translation successful"
+
+msgid "Translation failed"
+msgstr "Translation failed"
