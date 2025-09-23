@@ -135,7 +135,7 @@ class Frontend {
 	 * @return string
 	 */
 	public function render_summarizer_placeholder( $content ) {
-		if ( $this->summarizer_enabled ) {
+		if ( $this->summarizer_enabled && \is_single() ) {
 			$content = '<fieldset class="nanopress-ai-summary-container"><legend>' . esc_html__( 'AI Summary', 'nano-press' ) . '</legend><div id="summary-result"><p>Generating summary...</p></div></fieldset>' . $content;
 		}
 		return $content;
