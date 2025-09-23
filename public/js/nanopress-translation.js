@@ -33,7 +33,7 @@ async function handleTranslation() {
 
 	// --- Step 2: Verify Browser and API Support ---
 	if ( ! ('Translator' in window) || ! ('LanguageDetector' in window)) {
-		statusEl.innerHTML = ` < strong > Translation Failed: < / strong > Your browser does not support the required Translation APIs.`;
+		statusEl.innerHTML = `<strong>Translation Failed: </strong> Your browser does not support the required Translation APIs.`;
 		console.error( "Translator or LanguageDetector API not found on the window object." );
 		return; // Stop execution if APIs are missing
 	}
@@ -92,7 +92,7 @@ async function handleTranslation() {
 
 	} catch (error) {
 		console.error( 'Translation failed:', error );
-		statusEl.innerHTML = ` < strong > An error occurred: < / strong > < br > ${error.message}`;
+		statusEl.innerHTML = ` <strong>An error occurred: </strong> <br> ${error.message}`;
 	} finally {
 		// Re-enable the dropdown regardless of success or failure
 		translateDropdown.disabled = false;
@@ -128,7 +128,7 @@ async function detectLanguage() {
 		}
 	} catch (error) {
 		console.error( 'Language detection failed:', error );
-		statusEl.innerHTML = ` < p class = "text-red-600 font-semibold" > An error occurred during detection.< / p > `;
+		statusEl.innerHTML = `<p class="text-red-600 font-semibold"> An error occurred during detection.</p>`;
 		return null;
 	}
 }
