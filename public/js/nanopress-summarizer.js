@@ -19,12 +19,36 @@ document.addEventListener('DOMContentLoaded', async () => {
 		expectedContextLanguages : ['en'], // Currently only English is supported, but it can take other languages as input.
 		expectedInputLanguages: ['en'], // Currently only English is supported, but it can take other languages as input and generate summaries in english.
 		outputLanguage: 'en', // Currently only English is supported.
+		monitor( m ) {
+			m.addEventListener('downloadprogress', (e) => {
+      			console.log(`Language Model Downloaded ${e.loaded * 100}%`);
+    		} );
+		}
 	};
 
 	// Check if the Summarizer API is available in the browser
 	if ('Summarizer' in self) {
 		try {
-			const availability = await Summarizer.availability();
+			
+			summaryOutput.innerHTML = 'Detecting page language...';
+			const sourceLanguage = await detectLanguage();
+
+			if ( ! sourceLanguage) {
+				// Error message is already set by detectLanguage() if it fails
+				throw new Error( "Could not determine the source language." );
+			}
+
+			console.log( `Source language detected: ${sourceLanguage}` );
+
+			summaryOutput.innerHTML = 'Checking summarization model availability...';
+
+			const availability = await Summarizer.availability( {
+				expectedInputLanguages: [sourceLanguage],
+				outputLanguage: 'en',
+				type: options.type,
+				format: options.format,
+				length: options.length,
+			} );
 
 			if ('available' === availability) {
 				// If the API is supported, create a summarizer instance
@@ -41,11 +65,23 @@ document.addEventListener('DOMContentLoaded', async () => {
 				// Display the generated summary
 				summaryOutput.innerHTML = `<p>${markdownSummary}</p>`;
 
-			} else {
+			} else if ( 'unavailable' === availability ) {
 				// Handle the case where the API is not supported
 				const reason = availability || 'The browser does not support this feature.';
 				console.warn('Summarizer not supported:', reason);
 				summaryOutput.innerHTML = `<p class="font-semibold">Summarizer API Not Supported: ${reason}</p>`;
+				summaryOutput.classList.remove('bg-blue-50', 'border-blue-400', 'text-blue-800');
+				summaryOutput.classList.add('bg-yellow-50', 'border-yellow-400', 'text-yellow-800');
+			} else if ( 'downloadable' === availability ) {
+				// Handle the case where the model needs to be downloaded
+				console.warn('Summarizer model needs to be downloaded. Please try again later.');
+				summaryOutput.innerHTML = `<p class="font-semibold">Summarizer Model Downloadable: The model needs to be downloaded. Please try again later.</p>`;
+				summaryOutput.classList.remove('bg-blue-50', 'border-blue-400', 'text-blue-800');
+				summaryOutput.classList.add('bg-yellow-50', 'border-yellow-400', 'text-yellow-800');
+			} else {
+				// Handle any other unexpected availability status
+				console.warn('Unexpected Summarizer availability status:', availability);
+				summaryOutput.innerHTML = `<p class="font-semibold">Unexpected Summarizer Availability Status: ${availability}</p>`;
 				summaryOutput.classList.remove('bg-blue-50', 'border-blue-400', 'text-blue-800');
 				summaryOutput.classList.add('bg-yellow-50', 'border-yellow-400', 'text-yellow-800');
 			}
