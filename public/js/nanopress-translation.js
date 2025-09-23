@@ -166,3 +166,30 @@ function findTextNodes(node) {
 	}
 	return textNodes;
 }
+
+// On load select the language detected by the browser in the dropdown.
+document.addEventListener('DOMContentLoaded', async () => {
+
+	try {
+		// --- Step 3: Detect Source Language ---
+		statusEl.textContent = 'Detecting page language...';
+		const sourceLanguage = await detectLanguage();
+
+		if ( ! sourceLanguage) {
+			// Error message is already set by detectLanguage() if it fails
+			throw new Error( "Could not determine the source language." );
+		}
+		console.log( `Source language detected: ${sourceLanguage}` );
+		// If the detected language is in the dropdown, select it
+		const optionToSelect = Array.from( translateDropdown.options ).find( option => option.value === sourceLanguage );
+		if (optionToSelect) {
+			translateDropdown.value = sourceLanguage;
+			statusEl.textContent    = `Detected page language: ${ optionToSelect.text }`;
+		} else {
+			statusEl.textContent = 'Unsupported language : ' + sourceLanguage;
+		}
+	} catch (error) {
+		console.error( 'Error during initial language detection:', error );
+		statusEl.innerHTML = `<p class="text-red-600 font-semibold"> An error occurred during detection.</p>`;
+	}
+} );
