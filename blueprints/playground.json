@@ -1,0 +1,48 @@
+{
+  "$schema": "https://playground.wordpress.net/blueprint-schema.json",
+  "landingPage": "/wp-admin/",
+  "preferredVersions": {
+    "php": "latest",
+    "wp": "latest"
+  },
+  "steps": [
+    {
+      "step": "login",
+      "username": "admin",
+      "password": "password"
+    },
+    {
+      "step": "importThemeStarterContent"
+    },
+    {
+      "step": "installPlugin",
+      "pluginData": {
+        "resource": "url",
+        "url": "https://github.com/milindmore22/nanopress/archive/refs/heads/main.zip"
+      }
+    },
+    {
+      "step": "activatePlugin",
+      "pluginName": "NanoPress",
+      "pluginPath": "/wordpress/wp-content/plugins/nanopress-main/nanopress.php"
+    },
+    {
+      "step": "setSiteOptions",
+      "options": {
+        "nanopress_options": {
+          "enable_translation": "1",
+          "target_language": [
+            "en",
+            "hi",
+            "mr"
+          ],
+          "enable_summarizer": "1",
+          "prompt": "Summarize the key points of the following article in a concise paragraph.",
+          "summary_type": "key-points",
+          "summary_length": "medium",
+          "summary_format": "plain-text"
+        }
+      }
+    }
+  ]
+}

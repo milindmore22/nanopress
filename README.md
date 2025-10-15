@@ -27,3 +27,10 @@ NanoPress is an experimental WordPress plugin that enhances content management b
 - The plugin supports translations on the fly using Translator API.
 - To Enable translations, go to the NanoPress settings page and select your preferred languages.
 - The plugin will automatically translate content based on the selected languages.
+
+### Using WordPress Playground
+Use WordPress Playground to try this plugin directly in the browser without installing it on your site:
+
+[![Test on WordPress Playground](https://img.shields.io/badge/Test%20on%20WordPress%20Playground-3F57E1?style=for-the-badge&logo=WordPress&logoColor=ffffff)](https://playground.wordpress.net/?mode=seamless&blueprint-url=https://raw.githubusercontent.com/milindmore22/nano-press/main/blueprints/playground.json)
+
+Note: This is experimental. Playground does not support some of the WebAssembly features, so you will not have the full experience.
