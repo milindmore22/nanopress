@@ -72,12 +72,51 @@ document.addEventListener('DOMContentLoaded', async () => {
 				summaryOutput.innerHTML = `<p class="font-semibold">Summarizer API Not Supported: ${reason}</p>`;
 				summaryOutput.classList.remove('bg-blue-50', 'border-blue-400', 'text-blue-800');
 				summaryOutput.classList.add('bg-yellow-50', 'border-yellow-400', 'text-yellow-800');
-			} else if ( 'downloadable' === availability ) {
+			} else if ( 'downloadable' === availability || 'downloading' === availability ) {
 				// Handle the case where the model needs to be downloaded
-				console.warn('Summarizer model needs to be downloaded. Please try again later.');
-				summaryOutput.innerHTML = `<p class="font-semibold">Summarizer Model Downloadable: The model needs to be downloaded. Please try again later.</p>`;
+				// User gesture is required to download the model
+				console.warn('Summarizer model needs to be downloaded.');
+				summaryOutput.innerHTML = `
+					<div class="space-y-3">
+						<p class="font-semibold">Summarizer Model Required</p>
+						<p>The summarization model needs to be downloaded first. Click the button below to download and use it.</p>
+						<button id="download-model-btn" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">
+							Download Model & Summarize
+						</button>
+					</div>
+				`;
 				summaryOutput.classList.remove('bg-blue-50', 'border-blue-400', 'text-blue-800');
 				summaryOutput.classList.add('bg-yellow-50', 'border-yellow-400', 'text-yellow-800');
+
+				// Add click event to download button (user gesture required)
+				document.getElementById('download-model-btn').addEventListener('click', async () => {
+					try {
+						summaryOutput.innerHTML = 'Downloading summarization model... This may take a moment.';
+						summaryOutput.classList.remove('bg-yellow-50', 'border-yellow-400', 'text-yellow-800');
+						summaryOutput.classList.add('bg-blue-50', 'border-blue-400', 'text-blue-800');
+
+						// Now with user gesture, we can create the summarizer
+						const summarizer = await Summarizer.create(options);
+
+						summaryOutput.innerHTML = 'Generating summary...';
+
+						// Get the text from the article
+						const textToSummarize = articleContent.innerText;
+
+						// Generate the summary
+						const summary = await summarizer.summarize(textToSummarize);
+
+						const markdownSummary = marked.parse(summary);
+
+						// Display the generated summary
+						summaryOutput.innerHTML = `<p>${markdownSummary}</p>`;
+					} catch (downloadError) {
+						console.error('Error downloading or using the model:', downloadError);
+						summaryOutput.innerHTML = `<p>An error occurred while downloading or using the model: ${downloadError.message}</p>`;
+						summaryOutput.classList.remove('bg-blue-50', 'border-blue-400', 'text-blue-800');
+						summaryOutput.classList.add('bg-red-50', 'border-red-400', 'text-red-800');
+					}
+				});
 			} else {
 				// Handle any other unexpected availability status
 				console.warn('Unexpected Summarizer availability status:', availability);
