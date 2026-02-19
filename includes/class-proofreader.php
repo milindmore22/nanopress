@@ -93,6 +93,6 @@ class Proofreader {
 		}
 
 		wp_enqueue_style( 'nanopress-proofreader-style', NANO_PRESS_PLUGIN_URL . 'public/css/nanopress-proofreader.css', array(), NANO_PRESS_VERSION );
-		wp_enqueue_script( 'nanopress-proofreader-script', NANO_PRESS_PLUGIN_URL . 'public/js/nanopress-proofreader.js', array( 'wp-data', 'wp-blocks', 'wp-element' ), NANO_PRESS_VERSION, true );
+		wp_enqueue_script( 'nanopress-proofreader-script', NANO_PRESS_PLUGIN_URL . 'public/js/nanopress-proofreader.js', array( 'wp-dom-ready', 'wp-data', 'wp-blocks' ), NANO_PRESS_VERSION, true );
 	}
 }
