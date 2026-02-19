@@ -1,0 +1,154 @@
+.nanopress-proofreader-container {
+	margin-top: 20px;
+	padding: 15px;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	background-color: #fafafa;
+}
+
+.nanopress-proofread-btn {
+	padding: 8px 20px;
+	background-color: #0073aa;
+	color: #fff;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+	font-size: 14px;
+}
+
+.nanopress-proofread-btn:hover {
+	background-color: #005177;
+}
+
+.nanopress-btn-disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+.nanopress-proofread-status {
+	margin-top: 10px;
+	font-size: 14px;
+	color: #333;
+}
+
+.nanopress-proofread-error {
+	color: #d63638;
+	font-weight: 600;
+}
+
+.nanopress-proofread-success {
+	color: #00a32a;
+	font-weight: 600;
+}
+
+.nanopress-proofread-panel {
+	margin-top: 15px;
+	border-top: 1px solid #ddd;
+	padding-top: 15px;
+}
+
+.nanopress-proofread-panel h3 {
+	margin: 0 0 10px;
+	font-size: 16px;
+}
+
+.nanopress-correction-item {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 8px 12px;
+	margin-bottom: 8px;
+	background-color: #fff;
+	border: 1px solid #e0e0e0;
+	border-radius: 4px;
+}
+
+.nanopress-correction-resolved {
+	opacity: 0.6;
+}
+
+.nanopress-correction-details {
+	flex: 1;
+	margin-right: 10px;
+	word-break: break-word;
+}
+
+.nanopress-correction-original {
+	text-decoration: line-through;
+	color: #d63638;
+}
+
+.nanopress-correction-arrow {
+	color: #666;
+	margin: 0 4px;
+}
+
+.nanopress-correction-suggestion {
+	color: #00a32a;
+	font-weight: 600;
+}
+
+.nanopress-correction-buttons {
+	display: flex;
+	gap: 6px;
+	flex-shrink: 0;
+}
+
+.nanopress-correction-accept {
+	padding: 4px 12px;
+	background-color: #00a32a;
+	color: #fff;
+	border: none;
+	border-radius: 3px;
+	cursor: pointer;
+	font-size: 13px;
+}
+
+.nanopress-correction-accept:hover {
+	background-color: #008a20;
+}
+
+.nanopress-correction-ignore {
+	padding: 4px 12px;
+	background-color: #ddd;
+	color: #333;
+	border: none;
+	border-radius: 3px;
+	cursor: pointer;
+	font-size: 13px;
+}
+
+.nanopress-correction-ignore:hover {
+	background-color: #ccc;
+}
+
+.nanopress-correction-accepted {
+	color: #00a32a;
+	font-size: 13px;
+}
+
+.nanopress-correction-ignored {
+	color: #666;
+	font-size: 13px;
+	font-style: italic;
+}
+
+.nanopress-proofread-actions {
+	margin-top: 12px;
+	padding-top: 12px;
+	border-top: 1px solid #eee;
+}
+
+.nanopress-accept-all-btn {
+	padding: 8px 20px;
+	background-color: #2271b1;
+	color: #fff;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+	font-size: 14px;
+}
+
+.nanopress-accept-all-btn:hover {
+	background-color: #135e96;
+}
