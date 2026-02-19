@@ -1,6 +1,7 @@
 /**
  * NanoPress Proofreader Script
  * This script handles grammar and spelling checks using the browser's Proofreader API.
+ * Runs in the WordPress admin post editor and integrates with the Gutenberg block editor.
  *
  * @package nano-press
  * @since 1.0.0
@@ -14,20 +15,58 @@ document.addEventListener('DOMContentLoaded', () => {
 	const correctionsEl     = document.getElementById( 'nanopress-proofread-corrections' );
 	const actionsEl         = document.getElementById( 'nanopress-proofread-actions' );
 	const acceptAllBtn      = document.getElementById( 'nanopress-accept-all-btn' );
-	const articleContent    = document.querySelector( '.entry-content' ) || document.querySelector( 'main' ) || document.querySelector( 'article' );
 
-	if ( ! proofreadBtn || ! articleContent ) {
+	if ( ! proofreadBtn ) {
 		return;
 	}
 
 	let currentCorrections  = [];
 	let correctedInput      = '';
-	let originalContent     = '';
+	let originalText        = '';
 
 	proofreadBtn.addEventListener( 'click', handleProofread );
 
 	if ( acceptAllBtn ) {
 		acceptAllBtn.addEventListener( 'click', handleAcceptAll );
+	}
+
+	/**
+	 * Retrieves the plain text content from the Gutenberg editor.
+	 *
+	 * @returns {string} The plain text content of the editor.
+	 */
+	function getEditorText() {
+		if ( typeof wp !== 'undefined' && wp.data && wp.data.select( 'core/editor' ) ) {
+			const content = wp.data.select( 'core/editor' ).getEditedPostContent();
+			// Strip HTML tags to get plain text for proofreading.
+			const parser  = new DOMParser();
+			const doc     = parser.parseFromString( content, 'text/html' );
+			return doc.body.textContent || '';
+		}
+		return '';
+	}
+
+	/**
+	 * Retrieves the raw HTML content from the Gutenberg editor.
+	 *
+	 * @returns {string} The HTML content of the editor.
+	 */
+	function getEditorContent() {
+		if ( typeof wp !== 'undefined' && wp.data && wp.data.select( 'core/editor' ) ) {
+			return wp.data.select( 'core/editor' ).getEditedPostContent();
+		}
+		return '';
+	}
+
+	/**
+	 * Updates the editor content with new HTML.
+	 *
+	 * @param {string} newContent The new HTML content.
+	 */
+	function setEditorContent( newContent ) {
+		if ( typeof wp !== 'undefined' && wp.data && wp.data.dispatch( 'core/editor' ) ) {
+			wp.data.dispatch( 'core/editor' ).editPost( { content: newContent } );
+		}
 	}
 
 	/**
@@ -71,10 +110,16 @@ document.addEventListener('DOMContentLoaded', () => {
 				expectedInputLanguages: ['en'],
 			} );
 
-			originalContent = articleContent.innerHTML;
-			const textContent = articleContent.textContent;
+			originalText = getEditorText();
 
-			const result = await proofreader.proofread( textContent );
+			if ( ! originalText.trim() ) {
+				statusEl.innerHTML = '<p class="nanopress-proofread-error">No content found to proofread. Please add some text first.</p>';
+				proofreadBtn.disabled = false;
+				proofreadBtn.classList.remove( 'nanopress-btn-disabled' );
+				return;
+			}
+
+			const result = await proofreader.proofread( originalText );
 
 			correctedInput     = result.correctedInput || '';
 			currentCorrections = result.corrections || [];
@@ -84,7 +129,7 @@ document.addEventListener('DOMContentLoaded', () => {
 				panelEl.style.display = 'none';
 			} else {
 				statusEl.innerHTML = '<p>Found ' + currentCorrections.length + ' suggestion(s).</p>';
-				renderCorrections( textContent );
+				renderCorrections( originalText );
 				panelEl.style.display = 'block';
 				actionsEl.style.display = 'block';
 			}
@@ -111,8 +156,8 @@ document.addEventListener('DOMContentLoaded', () => {
 		correctionsEl.innerHTML = '';
 
 		currentCorrections.forEach( ( correction, index ) => {
-			const originalText = sourceText.substring( correction.startIndex, correction.endIndex );
-			const suggestion   = correction.suggestion || '';
+			const originalSegment = sourceText.substring( correction.startIndex, correction.endIndex );
+			const suggestion      = correction.suggestion || '';
 
 			const itemEl       = document.createElement( 'div' );
 			itemEl.className   = 'nanopress-correction-item';
@@ -123,7 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 			const originalEl     = document.createElement( 'span' );
 			originalEl.className = 'nanopress-correction-original';
-			originalEl.textContent = originalText;
+			originalEl.textContent = originalSegment;
 
 			const arrowEl     = document.createElement( 'span' );
 			arrowEl.className = 'nanopress-correction-arrow';
@@ -141,12 +186,14 @@ document.addEventListener('DOMContentLoaded', () => {
 			buttonsEl.className = 'nanopress-correction-buttons';
 
 			const acceptBtn     = document.createElement( 'button' );
-			acceptBtn.className = 'nanopress-correction-accept';
+			acceptBtn.className = 'button nanopress-correction-accept';
+			acceptBtn.type      = 'button';
 			acceptBtn.textContent = 'Accept';
 			acceptBtn.addEventListener( 'click', () => handleAcceptSingle( index, itemEl ) );
 
 			const ignoreBtn     = document.createElement( 'button' );
-			ignoreBtn.className = 'nanopress-correction-ignore';
+			ignoreBtn.className = 'button nanopress-correction-ignore';
+			ignoreBtn.type      = 'button';
 			ignoreBtn.textContent = 'Ignore';
 			ignoreBtn.addEventListener( 'click', () => handleIgnore( itemEl ) );
 
@@ -161,7 +208,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	}
 
 	/**
-	 * Handles accepting a single correction by walking DOM text nodes.
+	 * Handles accepting a single correction by replacing text in the editor content.
 	 *
 	 * @param {number} index The index of the correction.
 	 * @param {HTMLElement} itemEl The correction item element.
@@ -173,13 +220,13 @@ document.addEventListener('DOMContentLoaded', () => {
 			return;
 		}
 
-		// Walk text nodes to find the correct position and apply replacement.
-		replaceTextAtPosition(
-			articleContent,
-			correction.startIndex,
-			correction.endIndex,
-			correction.suggestion || ''
-		);
+		const originalSegment = originalText.substring( correction.startIndex, correction.endIndex );
+		const suggestion      = correction.suggestion || '';
+
+		// Apply correction to the editor HTML content.
+		const content    = getEditorContent();
+		const newContent = content.replace( originalSegment, suggestion );
+		setEditorContent( newContent );
 
 		// Mark this correction item as resolved.
 		itemEl.classList.add( 'nanopress-correction-resolved' );
@@ -207,23 +254,24 @@ document.addEventListener('DOMContentLoaded', () => {
 	}
 
 	/**
-	 * Handles accepting all corrections at once by applying each in reverse order.
+	 * Handles accepting all corrections at once.
 	 * Applies corrections from last to first to preserve text positions.
 	 */
 	function handleAcceptAll() {
+		let content = getEditorContent();
+
 		// Sort corrections in reverse order by startIndex to preserve positions.
 		const sorted = currentCorrections
-			.map( ( c, i ) => ( { correction: c, index: i } ) )
-			.sort( ( a, b ) => b.correction.startIndex - a.correction.startIndex );
+			.slice()
+			.sort( ( a, b ) => b.startIndex - a.startIndex );
 
-		sorted.forEach( ( entry ) => {
-			replaceTextAtPosition(
-				articleContent,
-				entry.correction.startIndex,
-				entry.correction.endIndex,
-				entry.correction.suggestion || ''
-			);
+		sorted.forEach( ( correction ) => {
+			const originalSegment = originalText.substring( correction.startIndex, correction.endIndex );
+			const suggestion      = correction.suggestion || '';
+			content = content.replace( originalSegment, suggestion );
 		} );
+
+		setEditorContent( content );
 
 		// Mark all items as resolved.
 		const items = correctionsEl.querySelectorAll( '.nanopress-correction-item' );
@@ -249,52 +297,6 @@ document.addEventListener('DOMContentLoaded', () => {
 		if ( items.length === resolved.length ) {
 			statusEl.innerHTML = '<p class="nanopress-proofread-success">All corrections reviewed! ✅</p>';
 			actionsEl.style.display = 'none';
-		}
-	}
-
-	/**
-	 * Replaces text at a specific position by walking DOM text nodes.
-	 * This preserves HTML structure while replacing text content.
-	 *
-	 * @param {HTMLElement} container The container element.
-	 * @param {number} startIndex The start index in the text content.
-	 * @param {number} endIndex The end index in the text content.
-	 * @param {string} replacement The replacement text.
-	 */
-	function replaceTextAtPosition( container, startIndex, endIndex, replacement ) {
-		const textNodes = [];
-		const walker    = document.createTreeWalker( container, NodeFilter.SHOW_TEXT, null );
-
-		while ( walker.nextNode() ) {
-			textNodes.push( walker.currentNode );
-		}
-
-		let offset = 0;
-
-		for ( let i = 0; i < textNodes.length; i++ ) {
-			const node       = textNodes[i];
-			const nodeLength = node.nodeValue.length;
-			const nodeStart  = offset;
-			const nodeEnd    = offset + nodeLength;
-
-			// Check if this text node overlaps with the correction range.
-			if ( nodeEnd > startIndex && nodeStart < endIndex ) {
-				const replaceStart = Math.max( startIndex - nodeStart, 0 );
-				const replaceEnd   = Math.min( endIndex - nodeStart, nodeLength );
-				const before       = node.nodeValue.substring( 0, replaceStart );
-				const after        = node.nodeValue.substring( replaceEnd );
-
-				// Only include the replacement text in the first overlapping node.
-				if ( nodeStart <= startIndex ) {
-					node.nodeValue = before + replacement + after;
-				} else {
-					node.nodeValue = after;
-				}
-
-				return; // Correction applied.
-			}
-
-			offset += nodeLength;
 		}
 	}
 

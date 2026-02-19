@@ -63,5 +63,9 @@ class Nano_Press {
 		// Load the frontend class.
 		require_once NANO_PRESS_PLUGIN_DIR . 'includes/class-frontend.php';
 		$this->frontend = new Frontend();
+
+		// Load the proofreader admin class.
+		require_once NANO_PRESS_PLUGIN_DIR . 'includes/class-proofreader.php';
+		new Proofreader();
 	}
 }

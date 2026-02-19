@@ -27,13 +27,6 @@ class Frontend {
 	private $summarizer_enabled;
 
 	/**
-	 * Proofreader enabled
-	 *
-	 * @var bool
-	 */
-	private $proofreader_enabled;
-
-	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -54,16 +47,6 @@ class Frontend {
 			add_action( 'the_content', array( $this, 'render_summarizer_placeholder' ) );
 			// Enqueue scripts for summarizer.
 			add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_summarizer_scripts' ) );
-		}
-
-		// Check if proofreader is enabled.
-		$this->proofreader_enabled = $this->is_proofreader_enabled();
-
-		if ( $this->proofreader_enabled ) {
-			// Render the proofreader UI in the content.
-			add_action( 'the_content', array( $this, 'render_proofreader_placeholder' ) );
-			// Enqueue scripts and styles for proofreader.
-			add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_proofreader_scripts' ) );
 		}
 	}
 
@@ -154,56 +137,6 @@ class Frontend {
 	public function render_summarizer_placeholder( $content ) {
 		if ( $this->summarizer_enabled && \is_single() ) {
 			$content = '<fieldset class="nanopress-ai-summary-container"><legend>' . esc_html__( 'AI Summary', 'nano-press' ) . '</legend><div id="summary-result"><p>Generating summary...</p></div></fieldset>' . $content;
-		}
-		return $content;
-	}
-
-	/**
-	 * Check if proofreader is enabled.
-	 *
-	 * @return bool
-	 */
-	public function is_proofreader_enabled() {
-		if ( ! isset( $this->proofreader_enabled ) ) {
-			$options                   = get_option( 'nanopress_options', array( 'enable_proofreader' => '0' ) );
-			$this->proofreader_enabled = ! empty( $options['enable_proofreader'] );
-		}
-
-		return $this->proofreader_enabled;
-	}
-
-	/**
-	 * Enqueue scripts and styles for the proofreader.
-	 *
-	 * @return void
-	 */
-	public function enqueue_proofreader_scripts() {
-		wp_enqueue_style( 'nanopress-proofreader-style', NANO_PRESS_PLUGIN_URL . 'public/css/nanopress-proofreader.css', array(), NANO_PRESS_VERSION );
-		wp_enqueue_script( 'nanopress-proofreader-script', NANO_PRESS_PLUGIN_URL . 'public/js/nanopress-proofreader.js', array(), NANO_PRESS_VERSION, true );
-	}
-
-	/**
-	 * Render the proofreader button and review panel after content.
-	 *
-	 * @param string $content The content to be displayed.
-	 *
-	 * @return string
-	 */
-	public function render_proofreader_placeholder( $content ) {
-		if ( $this->proofreader_enabled && \is_single() ) {
-			$proofreader_html  = '<div id="nanopress-proofreader-container" class="nanopress-proofreader-container">';
-			$proofreader_html .= '<button id="nanopress-proofread-btn" class="nanopress-proofread-btn">' . esc_html__( 'Proofread', 'nano-press' ) . '</button>';
-			$proofreader_html .= '<div id="nanopress-proofread-status" class="nanopress-proofread-status"></div>';
-			$proofreader_html .= '<div id="nanopress-proofread-panel" class="nanopress-proofread-panel" style="display:none;">';
-			$proofreader_html .= '<h3>' . esc_html__( 'Proofreader Results', 'nano-press' ) . '</h3>';
-			$proofreader_html .= '<div id="nanopress-proofread-corrections"></div>';
-			$proofreader_html .= '<div id="nanopress-proofread-actions" class="nanopress-proofread-actions" style="display:none;">';
-			$proofreader_html .= '<button id="nanopress-accept-all-btn" class="nanopress-accept-all-btn">' . esc_html__( 'Accept All', 'nano-press' ) . '</button>';
-			$proofreader_html .= '</div>';
-			$proofreader_html .= '</div>';
-			$proofreader_html .= '</div>';
-
-			$content .= $proofreader_html;
 		}
 		return $content;
 	}
