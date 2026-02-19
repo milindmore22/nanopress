@@ -35,6 +35,18 @@
 		}
 
 		/**
+		 * Extracts the suggestion text from a correction object.
+		 * The Chrome Proofreader API may use different property names
+		 * depending on the browser version.
+		 *
+		 * @param {Object} correction The correction object from the API.
+		 * @returns {string} The suggested replacement text.
+		 */
+		function getSuggestionText( correction ) {
+			return correction.insertion || correction.suggestion || correction.replacement || correction.correctedText || '';
+		}
+
+		/**
 		 * Extracts plain text from all blocks in the Gutenberg editor.
 		 *
 		 * @returns {string} The concatenated plain text content.
@@ -175,7 +187,7 @@
 
 			sorted.forEach( ( correction ) => {
 				const originalSegment = sourceText.substring( correction.startIndex, correction.endIndex );
-				const suggestion      = correction.suggestion || '';
+				const suggestion      = getSuggestionText( correction );
 				applyCorrection( originalSegment, suggestion );
 			} );
 		}
@@ -269,7 +281,7 @@
 
 			currentCorrections.forEach( ( correction, index ) => {
 				const originalSegment = sourceText.substring( correction.startIndex, correction.endIndex );
-				const suggestion      = correction.suggestion || '';
+				const suggestion      = getSuggestionText( correction );
 
 				const itemEl     = document.createElement( 'div' );
 				itemEl.className = 'nanopress-correction-item';
@@ -333,7 +345,7 @@
 			}
 
 			const originalSegment = originalText.substring( correction.startIndex, correction.endIndex );
-			const suggestion      = correction.suggestion || '';
+			const suggestion      = getSuggestionText( correction );
 
 			applyCorrection( originalSegment, suggestion );
 
