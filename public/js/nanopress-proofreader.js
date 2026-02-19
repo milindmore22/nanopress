@@ -72,7 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			} );
 
 			originalContent = articleContent.innerHTML;
-			const textContent = articleContent.innerText;
+			const textContent = articleContent.textContent;
 
 			const result = await proofreader.proofread( textContent );
 
