@@ -91,7 +91,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
 		} catch (error) {
 			console.error( 'Proofreader error:', error );
-			statusEl.innerHTML = '<p class="nanopress-proofread-error">An error occurred while proofreading: ' + error.message + '</p>';
+			const errorEl = document.createElement( 'p' );
+			errorEl.className = 'nanopress-proofread-error';
+			errorEl.textContent = 'An error occurred while proofreading: ' + error.message;
+			statusEl.innerHTML = '';
+			statusEl.appendChild( errorEl );
 		} finally {
 			proofreadBtn.disabled = false;
 			proofreadBtn.classList.remove( 'nanopress-btn-disabled' );
@@ -157,7 +161,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	}
 
 	/**
-	 * Handles accepting a single correction.
+	 * Handles accepting a single correction by walking DOM text nodes.
 	 *
 	 * @param {number} index The index of the correction.
 	 * @param {HTMLElement} itemEl The correction item element.
@@ -169,17 +173,13 @@ document.addEventListener('DOMContentLoaded', () => {
 			return;
 		}
 
-		const textContent    = articleContent.innerText;
-		const originalText   = textContent.substring( correction.startIndex, correction.endIndex );
-
-		// Replace the first occurrence of the original text in the HTML content.
-		const currentHtml = articleContent.innerHTML;
-		const escapedOriginal = escapeHtml( originalText );
-		const updatedHtml = currentHtml.replace( escapedOriginal, escapeHtml( correction.suggestion || '' ) );
-
-		if ( updatedHtml !== currentHtml ) {
-			articleContent.innerHTML = updatedHtml;
-		}
+		// Walk text nodes to find the correct position and apply replacement.
+		replaceTextAtPosition(
+			articleContent,
+			correction.startIndex,
+			correction.endIndex,
+			correction.suggestion || ''
+		);
 
 		// Mark this correction item as resolved.
 		itemEl.classList.add( 'nanopress-correction-resolved' );
@@ -207,12 +207,23 @@ document.addEventListener('DOMContentLoaded', () => {
 	}
 
 	/**
-	 * Handles accepting all corrections at once.
+	 * Handles accepting all corrections at once by applying each in reverse order.
+	 * Applies corrections from last to first to preserve text positions.
 	 */
 	function handleAcceptAll() {
-		if ( correctedInput ) {
-			articleContent.innerText = correctedInput;
-		}
+		// Sort corrections in reverse order by startIndex to preserve positions.
+		const sorted = currentCorrections
+			.map( ( c, i ) => ( { correction: c, index: i } ) )
+			.sort( ( a, b ) => b.correction.startIndex - a.correction.startIndex );
+
+		sorted.forEach( ( entry ) => {
+			replaceTextAtPosition(
+				articleContent,
+				entry.correction.startIndex,
+				entry.correction.endIndex,
+				entry.correction.suggestion || ''
+			);
+		} );
 
 		// Mark all items as resolved.
 		const items = correctionsEl.querySelectorAll( '.nanopress-correction-item' );
@@ -242,15 +253,49 @@ document.addEventListener('DOMContentLoaded', () => {
 	}
 
 	/**
-	 * Escapes HTML special characters in a string.
+	 * Replaces text at a specific position by walking DOM text nodes.
+	 * This preserves HTML structure while replacing text content.
 	 *
-	 * @param {string} text The text to escape.
-	 * @returns {string} The escaped text.
+	 * @param {HTMLElement} container The container element.
+	 * @param {number} startIndex The start index in the text content.
+	 * @param {number} endIndex The end index in the text content.
+	 * @param {string} replacement The replacement text.
 	 */
-	function escapeHtml( text ) {
-		const div = document.createElement( 'div' );
-		div.appendChild( document.createTextNode( text ) );
-		return div.innerHTML;
+	function replaceTextAtPosition( container, startIndex, endIndex, replacement ) {
+		const textNodes = [];
+		const walker    = document.createTreeWalker( container, NodeFilter.SHOW_TEXT, null );
+
+		while ( walker.nextNode() ) {
+			textNodes.push( walker.currentNode );
+		}
+
+		let offset = 0;
+
+		for ( let i = 0; i < textNodes.length; i++ ) {
+			const node       = textNodes[i];
+			const nodeLength = node.nodeValue.length;
+			const nodeStart  = offset;
+			const nodeEnd    = offset + nodeLength;
+
+			// Check if this text node overlaps with the correction range.
+			if ( nodeEnd > startIndex && nodeStart < endIndex ) {
+				const replaceStart = Math.max( startIndex - nodeStart, 0 );
+				const replaceEnd   = Math.min( endIndex - nodeStart, nodeLength );
+				const before       = node.nodeValue.substring( 0, replaceStart );
+				const after        = node.nodeValue.substring( replaceEnd );
+
+				// Only include the replacement text in the first overlapping node.
+				if ( nodeStart <= startIndex ) {
+					node.nodeValue = before + replacement + after;
+				} else {
+					node.nodeValue = after;
+				}
+
+				return; // Correction applied.
+			}
+
+			offset += nodeLength;
+		}
 	}
 
 } );
