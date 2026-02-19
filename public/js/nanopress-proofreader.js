@@ -43,7 +43,7 @@
 		 * @returns {string} The suggested replacement text.
 		 */
 		function getSuggestionText( correction ) {
-			return correction.insertion || correction.suggestion || correction.replacement || correction.correctedText || '';
+			return correction.correction || correction.suggestion || correction.replacement || '';
 		}
 
 		/**
@@ -140,6 +140,56 @@
 		}
 
 		/**
+		 * Gets the plain text from an HTML string.
+		 *
+		 * @param {string} html The HTML string.
+		 * @returns {string} The plain text content.
+		 */
+		function getPlainText( html ) {
+			const parser = new DOMParser();
+			const doc    = parser.parseFromString( html, 'text/html' );
+			return doc.body.textContent || '';
+		}
+
+		/**
+		 * Replaces a plain-text segment inside an HTML string, preserving markup.
+		 * Walks the DOM text nodes to find and replace the matching text.
+		 *
+		 * @param {string} html            The HTML string to search in.
+		 * @param {string} originalSegment The plain text to find.
+		 * @param {string} replacement     The replacement plain text.
+		 * @returns {string|null} The updated HTML string, or null if not found.
+		 */
+		function replaceTextInHtml( html, originalSegment, replacement ) {
+			// If the HTML contains the segment directly (no markup in the way), do a simple replace.
+			if ( html.includes( originalSegment ) ) {
+				return html.replace( originalSegment, replacement );
+			}
+
+			// Otherwise, walk text nodes in the parsed HTML to handle inline markup.
+			const parser = new DOMParser();
+			const doc    = parser.parseFromString( html, 'text/html' );
+			const walker = doc.createTreeWalker( doc.body, NodeFilter.SHOW_TEXT );
+
+			let found = false;
+			while ( walker.nextNode() ) {
+				const node = walker.currentNode;
+				const idx  = node.nodeValue.indexOf( originalSegment );
+				if ( idx !== -1 ) {
+					node.nodeValue = node.nodeValue.substring( 0, idx ) + replacement + node.nodeValue.substring( idx + originalSegment.length );
+					found = true;
+					break;
+				}
+			}
+
+			if ( found ) {
+				return doc.body.innerHTML;
+			}
+
+			return null;
+		}
+
+		/**
 		 * Recursively walks blocks and updates the first matching text occurrence.
 		 *
 		 * @param {Array}  blocks          The blocks to search.
@@ -155,11 +205,16 @@
 				// Check common content attributes.
 				const contentKeys = [ 'content', 'citation', 'value', 'text' ];
 				for ( const key of contentKeys ) {
-					if ( block.attributes && typeof block.attributes[ key ] === 'string' && block.attributes[ key ].includes( originalSegment ) ) {
-						const newAttributes        = {};
-						newAttributes[ key ] = block.attributes[ key ].replace( originalSegment, replacement );
-						dispatch.updateBlockAttributes( block.clientId, newAttributes );
-						return true;
+					if ( block.attributes && typeof block.attributes[ key ] === 'string' ) {
+						const attrValue = block.attributes[ key ];
+						const result    = replaceTextInHtml( attrValue, originalSegment, replacement );
+
+						if ( result !== null ) {
+							const newAttributes  = {};
+							newAttributes[ key ] = result;
+							dispatch.updateBlockAttributes( block.clientId, newAttributes );
+							return true;
+						}
 					}
 				}
 
