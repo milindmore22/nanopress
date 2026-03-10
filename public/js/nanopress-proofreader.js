@@ -202,13 +202,12 @@
 			for ( let i = 0; i < blocks.length; i++ ) {
 				const block = blocks[ i ];
 
-				// Check common content attributes.
+				// Check common content attributes - must match the extraction logic.
 				const contentKeys = [ 'content', 'citation', 'value', 'text' ];
 				for ( const key of contentKeys ) {
-					if ( block.attributes && typeof block.attributes[ key ] === 'string' ) {
-						const attrValue = block.attributes[ key ];
+					if ( block.attributes && block.attributes[ key ] ) {
+						const attrValue = ( typeof block.attributes[ key ] === 'object' ) ? ( block.attributes[ key ].value || block.attributes[ key ] ) : block.attributes[ key ];
 						const result    = replaceTextInHtml( attrValue, originalSegment, replacement );
-
 						if ( result !== null ) {
 							const newAttributes  = {};
 							newAttributes[ key ] = result;
@@ -241,7 +240,11 @@
 				.sort( ( a, b ) => b.startIndex - a.startIndex );
 
 			sorted.forEach( ( correction ) => {
+				// if sourceText contains any spaces then we should skip applying this correction because it is likely a false positive or an issue with the API's text segmentation. We only want to apply corrections for single words or phrases without spaces.
 				const originalSegment = sourceText.substring( correction.startIndex, correction.endIndex );
+				if ( originalSegment.includes( ' ' ) ) {
+					return;
+				}
 				const suggestion      = getSuggestionText( correction );
 				applyCorrection( originalSegment, suggestion );
 			} );
@@ -333,10 +336,14 @@
 		 */
 		function renderCorrections( sourceText ) {
 			correctionsEl.innerHTML = '';
-
 			currentCorrections.forEach( ( correction, index ) => {
 				const originalSegment = sourceText.substring( correction.startIndex, correction.endIndex );
 				const suggestion      = getSuggestionText( correction );
+
+				// if sourceText contains any spaces then we should skip rendering this correction because it is likely a false positive or an issue with the API's text segmentation. We only want to show corrections for single words or phrases without spaces.
+				if ( originalSegment.includes( ' ' ) ) {
+					return;
+				}
 
 				const itemEl     = document.createElement( 'div' );
 				itemEl.className = 'nanopress-correction-item';
