@@ -265,6 +265,16 @@ class Settings {
 		\add_settings_field( 'summary_type', 'Summary Type', array( $this, 'render_summary_type_field' ), $this->page_slug, 'summarizer_settings_section' );
 		\add_settings_field( 'summary_length', 'Summary Length', array( $this, 'render_summary_length_field' ), $this->page_slug, 'summarizer_settings_section' );
 		\add_settings_field( 'summary_format', 'Summary Format', array( $this, 'render_summary_format_field' ), $this->page_slug, 'summarizer_settings_section' );
+
+		// Add setting section for Proofreader API.
+		add_settings_section(
+			'proofreader_settings_section', // ID.
+			'Proofreader Settings',          // Title.
+			null,                            // Callback (optional description).
+			$this->page_slug                 // Page slug.
+		);
+
+		\add_settings_field( 'enable_proofreader', 'Enable Proofreader', array( $this, 'render_enable_proofreader_field' ), $this->page_slug, 'proofreader_settings_section' );
 	}
 
 	/**
@@ -301,6 +311,13 @@ class Settings {
 			$sanitized_input['enable_translation'] = true; // Checkbox is checked.
 		} else {
 			$sanitized_input['enable_translation'] = false; // Checkbox is unchecked.
+		}
+
+		// Sanitize the 'enable_proofreader' field.
+		if ( isset( $input['enable_proofreader'] ) && $input['enable_proofreader'] ) {
+			$sanitized_input['enable_proofreader'] = true; // Checkbox is checked.
+		} else {
+			$sanitized_input['enable_proofreader'] = false; // Checkbox is unchecked.
 		}
 
 		return $sanitized_input;
@@ -435,5 +452,20 @@ class Settings {
 
 		// Provide a description for the field.
 		echo '<p class="description">Select the format for the summary output.</p>';
+	}
+
+	/**
+	 * Renders the HTML for the 'enable_proofreader' checkbox field.
+	 */
+	public function render_enable_proofreader_field() {
+		// Check if the proofreader option is set and enabled.
+		$checked  = isset( $this->options['enable_proofreader'] ) && $this->options['enable_proofreader'] ? '1' : '0';
+		$disabled = $this->is_ssl ? '' : 'disabled="disabled"'; // Disable if not using SSL.
+		$checked  = $this->is_ssl ? $checked : '0'; // Ensure $checked is always '0' or '1'.
+
+		// Render the checkbox input.
+		echo '<input type="checkbox" id="' . esc_attr( $this->option_name ) . '[enable_proofreader]" name="' . esc_attr( $this->option_name ) . '[enable_proofreader]" value="1" ' . checked( '1', $checked, false ) . ' ' . esc_attr( $disabled ) . ' />';
+		echo '<label for="' . esc_attr( $this->option_name ) . '[enable_proofreader]"> Enable Proofreader</label>';
+		echo '<p class="description">Check this box to enable grammar and spelling checks on post content using the Chrome Built-in Proofreader API.</p>';
 	}
 }

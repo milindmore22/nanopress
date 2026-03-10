@@ -1,0 +1,107 @@
+.nanopress-proofreader-container {
+	padding: 0;
+}
+
+.nanopress-proofread-btn {
+	width: 100%;
+	margin-bottom: 10px;
+}
+
+.nanopress-btn-disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+.nanopress-proofread-status {
+	margin-top: 8px;
+	font-size: 13px;
+	color: #333;
+}
+
+.nanopress-proofread-error {
+	color: #d63638;
+	font-weight: 600;
+}
+
+.nanopress-proofread-success {
+	color: #00a32a;
+	font-weight: 600;
+}
+
+.nanopress-proofread-panel {
+	margin-top: 12px;
+	border-top: 1px solid #ddd;
+	padding-top: 12px;
+}
+
+.nanopress-proofread-panel h4 {
+	margin: 0 0 8px;
+	font-size: 13px;
+}
+
+.nanopress-correction-item {
+	display: flex;
+	flex-direction: column;
+	padding: 8px;
+	margin-bottom: 6px;
+	background-color: #f6f7f7;
+	border: 1px solid #dcdcde;
+	border-radius: 3px;
+}
+
+.nanopress-correction-resolved {
+	opacity: 0.6;
+}
+
+.nanopress-correction-details {
+	margin-bottom: 6px;
+	word-break: break-word;
+	font-size: 13px;
+}
+
+.nanopress-correction-original {
+	text-decoration: line-through;
+	color: #d63638;
+}
+
+.nanopress-correction-arrow {
+	color: #666;
+	margin: 0 2px;
+}
+
+.nanopress-correction-suggestion {
+	color: #00a32a;
+	font-weight: 600;
+}
+
+.nanopress-correction-buttons {
+	display: flex;
+	gap: 4px;
+}
+
+.nanopress-correction-accept,
+.nanopress-correction-ignore {
+	font-size: 12px;
+	padding: 2px 8px;
+}
+
+.nanopress-correction-accepted {
+	color: #00a32a;
+	font-size: 12px;
+}
+
+.nanopress-correction-ignored {
+	color: #666;
+	font-size: 12px;
+	font-style: italic;
+}
+
+.nanopress-proofread-actions {
+	margin-top: 10px;
+	padding-top: 10px;
+	border-top: 1px solid #eee;
+}
+
+.nanopress-accept-all-btn {
+	width: 100%;
+}
