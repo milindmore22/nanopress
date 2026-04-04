@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 /**
  * Class for NanoPress Plugin
  *
@@ -23,20 +26,6 @@ class Nano_Press {
 	private static $instance = null;
 
 	/**
-	 * Frontend instance.
-	 *
-	 * @var Frontend
-	 */
-	private $frontend;
-
-	/**
-	 * Settings instance.
-	 *
-	 * @var Nano_Press_Settings
-	 */
-	private $settings;
-
-	/**
 	 * Get the singleton instance of the class.
 	 *
 	 * @return Nano_Press
@@ -58,11 +47,11 @@ class Nano_Press {
 
 		// Load Settings class.
 		require_once NANO_PRESS_PLUGIN_DIR . 'includes/class-settings.php';
-		$this->settings = new Settings();
+		new Settings();
 
 		// Load the frontend class.
 		require_once NANO_PRESS_PLUGIN_DIR . 'includes/class-frontend.php';
-		$this->frontend = new Frontend();
+		new Frontend();
 
 		// Load the proofreader admin class.
 		require_once NANO_PRESS_PLUGIN_DIR . 'includes/class-proofreader.php';

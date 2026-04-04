@@ -1,11 +1,14 @@
 <?php
+
+declare(strict_types=1);
+
 /**
  * NanoPress Proofreader Admin Class
  *
  * Adds a proofreader meta box to the WordPress post editor
  * using the Chrome Built-in Proofreader API.
  *
- * @package nano-press
+ * @package nanopress
  */
 
 namespace NanoPress;
@@ -44,7 +47,7 @@ class Proofreader {
 		foreach ( $post_types as $post_type ) {
 			add_meta_box(
 				'nanopress-proofreader',
-				__( 'NanoPress Proofreader', 'nano-press' ),
+				__( 'NanoPress Proofreader', 'nanopress' ),
 				array( $this, 'render_meta_box' ),
 				$post_type,
 				'side',
@@ -64,15 +67,15 @@ class Proofreader {
 		?>
 		<div id="nanopress-proofreader-container" class="nanopress-proofreader-container">
 			<button id="nanopress-proofread-btn" type="button" class="button button-primary nanopress-proofread-btn">
-				<?php esc_html_e( 'Proofread', 'nano-press' ); ?>
+				<?php esc_html_e( 'Proofread', 'nanopress' ); ?>
 			</button>
 			<div id="nanopress-proofread-status" class="nanopress-proofread-status"></div>
 			<div id="nanopress-proofread-panel" class="nanopress-proofread-panel" style="display:none;">
-				<h4><?php esc_html_e( 'Proofreader Results', 'nano-press' ); ?></h4>
+				<h4><?php esc_html_e( 'Proofreader Results', 'nanopress' ); ?></h4>
 				<div id="nanopress-proofread-corrections"></div>
 				<div id="nanopress-proofread-actions" class="nanopress-proofread-actions" style="display:none;">
 					<button id="nanopress-accept-all-btn" type="button" class="button nanopress-accept-all-btn">
-						<?php esc_html_e( 'Accept All', 'nano-press' ); ?>
+						<?php esc_html_e( 'Accept All', 'nanopress' ); ?>
 					</button>
 				</div>
 			</div>

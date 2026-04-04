@@ -24,13 +24,13 @@
 }
 
 #ai-translator-language-selector #status.success {
-	color: green;
+	color: #008000;
 }
 
 #ai-translator-language-selector #status.error {
-	color: red;
+	color: #f00;
 }
 
 #ai-translator-language-selector #status.loading {
-	color: blue;
+	color: #00f;
 }

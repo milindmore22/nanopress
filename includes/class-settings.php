@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 /**
  * NanoPress Plugin Settings Class.
  *
@@ -19,7 +22,7 @@ class Settings {
 	/**
 	 * The single array of options stored in the wp_options table.
 	 *
-	 * @var array
+	 * @var array<string, mixed>
 	 */
 	private $options;
 
@@ -68,7 +71,7 @@ class Settings {
 	/**
 	 * Provides the list of languages supported by Google Translate.
 	 *
-	 * @return array An associative array of language codes and names.
+	 * @return array<string, string> An associative array of language codes and names.
 	 */
 	public static function get_supported_languages(): array {
 		// A comprehensive list of languages supported by Google Translate API.
@@ -184,7 +187,7 @@ class Settings {
 	/**
 	 * Provides the default values for all settings.
 	 *
-	 * @return array The default settings.
+	 * @return array<string, mixed> The default settings.
 	 */
 	private static function get_default_settings(): array {
 		return array(
@@ -195,7 +198,7 @@ class Settings {
 	/**
 	 * Adds the settings page to the WordPress admin menu (under "Settings").
 	 */
-	public function add_plugin_page() {
+	public function add_plugin_page(): void {
 		add_options_page(
 			'NanoPress Settings',      // Page title.
 			'NanoPress',               // Menu title.
@@ -208,7 +211,7 @@ class Settings {
 	/**
 	 * Renders the HTML for the settings page.
 	 */
-	public function create_admin_page() {
+	public function create_admin_page(): void {
 		// Retrieve the options from the database, with defaults if they don't exist.
 		$this->options = get_option( $this->option_name, self::get_default_settings() );
 		?>
@@ -233,7 +236,7 @@ class Settings {
 	/**
 	 * Registers the settings, sections, and fields with the Settings API.
 	 */
-	public function page_init() {
+	public function page_init(): void {
 		// Register the setting itself. This tells WordPress to handle saving.
 		register_setting(
 			$this->option_group,                // Option group.
@@ -244,7 +247,7 @@ class Settings {
 		add_settings_section(
 			'main_settings_section',       // ID.
 			'Translation Settings',        // Title.
-			null,                          // Callback (optional description).
+			'__return_false',             // Callback (optional description).
 			$this->page_slug               // Page slug.
 		);
 
@@ -256,7 +259,7 @@ class Settings {
 		add_settings_section(
 			'summarizer_settings_section', // ID.
 			'Summarizer Settings',          // Title.
-			null,                           // Callback (optional description).
+			'__return_false',              // Callback (optional description).
 			$this->page_slug                // Page slug.
 		);
 
@@ -270,7 +273,7 @@ class Settings {
 		add_settings_section(
 			'proofreader_settings_section', // ID.
 			'Proofreader Settings',          // Title.
-			null,                            // Callback (optional description).
+			'__return_false',               // Callback (optional description).
 			$this->page_slug                 // Page slug.
 		);
 
@@ -280,8 +283,8 @@ class Settings {
 	/**
 	 * Sanitizes and validates the input array before saving to the database.
 	 *
-	 * @param array $input The array of settings from the form submission.
-	 * @return array The sanitized array of settings.
+	 * @param array<string, mixed> $input The array of settings from the form submission.
+	 * @return array<string, mixed> The sanitized array of settings.
 	 */
 	public function sanitize( $input ): array {
 		$sanitized_input     = array();
@@ -326,7 +329,7 @@ class Settings {
 	/**
 	 * Renders the HTML for the 'target_language' multiselect field.
 	 */
-	public function render_language_field() {
+	public function render_language_field(): void {
 		$saved_languages = $this->options['target_language'] ?? self::get_default_settings()['target_language'];
 		// Ensure it's always an array for the in_array() check.
 		$saved_languages = (array) $saved_languages;
@@ -346,7 +349,7 @@ class Settings {
 	/**
 	 * Renders the HTML for the 'enable_translation' checkbox field.
 	 */
-	public function render_enable_translation_field() {
+	public function render_enable_translation_field(): void {
 		$checked  = isset( $this->options['enable_translation'] ) && $this->options['enable_translation'] ? '1' : '0';
 		$disabled = $this->is_ssl ? '' : 'disabled="disabled"'; // Disable if not using SSL.
 		$checked  = $this->is_ssl ? $checked : '0'; // Ensure $checked is always '0' or '1'.
@@ -359,7 +362,7 @@ class Settings {
 	/**
 	 * Renders the HTML for the 'enable_summarizer' checkbox field.
 	 */
-	public function render_enable_summarizer_field() {
+	public function render_enable_summarizer_field(): void {
 		// Check if the summarizer option is set and enabled.
 		$checked  = isset( $this->options['enable_summarizer'] ) && $this->options['enable_summarizer'] ? '1' : '0';
 		$disabled = $this->is_ssl ? '' : 'disabled="disabled"'; // Disable if not using SSL.
@@ -374,7 +377,7 @@ class Settings {
 	/**
 	 * Renders the HTML for the 'prompt' text field.
 	 */
-	public function render_prompt_field() {
+	public function render_prompt_field(): void {
 		// Default prompt if not set.
 		$prompt = isset( $this->options['prompt'] ) ? esc_textarea( $this->options['prompt'] ) : 'Summarize the key points of the following article in a concise paragraph.';
 
@@ -386,7 +389,7 @@ class Settings {
 	/**
 	 * Renders the HTML for the 'summary_type' select field.
 	 */
-	public function render_summary_type_field() {
+	public function render_summary_type_field(): void {
 		// Default to 'key-points' if not set.
 		$summary_type = isset( $this->options['summary_type'] ) ? $this->options['summary_type'] : 'key-points';
 
@@ -410,7 +413,7 @@ class Settings {
 	/**
 	 * Renders the HTML for the 'summary_length' select field.
 	 */
-	public function render_summary_length_field() {
+	public function render_summary_length_field(): void {
 		// Default to 'medium' if not set.
 		$summary_length = isset( $this->options['summary_length'] ) ? $this->options['summary_length'] : 'medium';
 
@@ -433,7 +436,7 @@ class Settings {
 	/**
 	 * Renders the HTML for the 'summary_format' select field.
 	 */
-	public function render_summary_format_field() {
+	public function render_summary_format_field(): void {
 		// Default to 'text' if not set.
 		$summary_format = isset( $this->options['summary_format'] ) ? $this->options['summary_format'] : 'text';
 
@@ -457,7 +460,7 @@ class Settings {
 	/**
 	 * Renders the HTML for the 'enable_proofreader' checkbox field.
 	 */
-	public function render_enable_proofreader_field() {
+	public function render_enable_proofreader_field(): void {
 		// Check if the proofreader option is set and enabled.
 		$checked  = isset( $this->options['enable_proofreader'] ) && $this->options['enable_proofreader'] ? '1' : '0';
 		$disabled = $this->is_ssl ? '' : 'disabled="disabled"'; // Disable if not using SSL.

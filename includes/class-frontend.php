@@ -1,8 +1,11 @@
 <?php
+
+declare(strict_types=1);
+
 /**
  * AI Translator Plugin Frontend Class
  *
- * @package nano-press
+ * @package nanopress
  */
 
 namespace NanoPress;
@@ -15,16 +18,16 @@ class Frontend {
 	/**
 	 * Translation enabled
 	 *
-	 * @var bool
+	 * @var bool|null
 	 */
-	private $translation_enabled;
+	private $translation_enabled = null;
 
 	/**
 	 * Summarizer enabled
 	 *
-	 * @var bool
+	 * @var bool|null
 	 */
-	private $summarizer_enabled;
+	private $summarizer_enabled = null;
 
 	/**
 	 * Constructor.
@@ -42,12 +45,14 @@ class Frontend {
 		// Check if summarizer is enabled.
 		$this->summarizer_enabled = $this->is_summarizer_enabled();
 
-		if ( $this->summarizer_enabled ) {
-			// Render the summarizer placeholder in the content.
-			add_action( 'the_content', array( $this, 'render_summarizer_placeholder' ) );
-			// Enqueue scripts for summarizer.
-			add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_summarizer_scripts' ) );
+		if ( ! $this->summarizer_enabled ) {
+			return;
 		}
+
+		// Render the summarizer placeholder in the content.
+		add_filter( 'the_content', array( $this, 'render_summarizer_placeholder' ) );
+		// Enqueue scripts for summarizer.
+		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_summarizer_scripts' ) );
 	}
 
 	/**
@@ -136,7 +141,7 @@ class Frontend {
 	 */
 	public function render_summarizer_placeholder( $content ) {
 		if ( $this->summarizer_enabled && \is_single() ) {
-			$content = '<fieldset class="nanopress-ai-summary-container"><legend>' . esc_html__( 'AI Summary', 'nano-press' ) . '</legend><div id="summary-result"><p>Generating summary...</p></div></fieldset>' . $content;
+			$content = '<fieldset class="nanopress-ai-summary-container"><legend>' . esc_html__( 'AI Summary', 'nanopress' ) . '</legend><div id="summary-result"><p>Generating summary...</p></div></fieldset>' . $content;
 		}
 		return $content;
 	}
