@@ -30,4 +30,4 @@ parameters:
 			- tests/
 			- vendor/
 		analyseAndScan:
-			- node_modules/
+				- node_modules/?
