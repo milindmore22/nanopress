@@ -1,14 +1,15 @@
 <?php
+
+declare( strict_types=1 );
+
 /**
- * Uninstall the AI Translator plugin.
+ * Cleans up NanoPress data on uninstall.
  *
- * This file is called when the plugin is uninstalled.
- * It removes any stored data associated with the plugin.
- *
- * @package AI_Translator
+ * @package nanopress
  */
 
-// If uninstall not called from WordPress, exit.
 if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	exit;
 }
+
+delete_option( 'nanopress_options' );

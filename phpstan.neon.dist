@@ -11,6 +11,8 @@ parameters:
 	reportAlwaysTrueInLastCondition: true
 	reportStaticMethodSignatures: true
 	reportWrongPhpDocTypeInVarTag: true
+	parallel:
+		maximumNumberOfProcesses: 1
 
 	# Configuration
 	level: 8

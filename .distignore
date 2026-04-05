@@ -1,12 +1,11 @@
 # Development and testing files
 /.github
-/.wordpress-org
 /node_modules
 /tests
 /bin
 /.editorconfig
 /.eslintignore
-/.eslintrc.json
+/.eslintrc.cjs
 /.gitignore
 /.distignore
 /phpcs.xml.dist
@@ -20,8 +19,10 @@
 /.nvmrc
 
 # Runtime source that should not be distributed as standalone files
-/assets/src
-/wp-assets
+/src
+/stubs
+/webpack.config.js
+/tsconfig.json
 
 # Duplicate packaged folder and archives
 /nanopress

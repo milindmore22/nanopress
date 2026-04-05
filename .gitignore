@@ -13,7 +13,6 @@ Thumbs.db
 # Dependencies
 /vendor/
 /node_modules/
-/stubs/
 
 # Build output
 build/

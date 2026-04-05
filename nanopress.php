@@ -25,22 +25,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
-// Define plugin constants.
-define( 'NANO_PRESS_VERSION', '1.0' );
-define( 'NANO_PRESS_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
-define( 'NANO_PRESS_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
+define( 'NANOPRESS_DIR', plugin_dir_path( __FILE__ ) );
 
-
-/**
- * Include the main plugin class
- */
-require_once NANO_PRESS_PLUGIN_DIR . 'includes/class-nano-press.php';
-/**
- * Initialize the plugin.
- *
- * @return void
- */
-function nano_press_init() {
-	Nano_Press::get_instance();
-}
-add_action( 'plugins_loaded', '\NanoPress\nano_press_init' );
+require_once NANOPRESS_DIR . 'includes/bootstrap.php';

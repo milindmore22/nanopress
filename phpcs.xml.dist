@@ -28,6 +28,12 @@
 	<rule ref="WordPress-VIP-Go">
 		<!-- Deprecated: @todo remove in PHPCS 4.0 -->
 		<exclude name="Generic.Functions.CallTimePassByReference.NotAllowed" />
+		<exclude name="WordPressVIPMinimum.JS.Window" />
+		<exclude name="WordPressVIPMinimum.JS.DangerouslySetInnerHTML" />
+		<exclude name="WordPressVIPMinimum.JS.InnerHTML" />
+		<exclude name="WordPressVIPMinimum.JS.StrippingTags" />
+		<exclude name="WordPressVIPMinimum.JS.StringConcat" />
+		<exclude name="WordPressVIPMinimum.JS.HTMLExecutingFunctions" />
 
 		<!-- Conflicts with WordPress coding practices -->
 		<exclude name="Universal.Arrays.DisallowShortArraySyntax.Found" />
