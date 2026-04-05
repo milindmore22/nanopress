@@ -62,11 +62,27 @@ const getAttributeHtml = (rawValue: unknown): string | null => {
 
 	if (
 		rawValue &&
-		typeof rawValue === 'object' &&
-		'value' in rawValue &&
-		typeof rawValue.value === 'string'
+		typeof rawValue === 'object'
 	) {
-		return rawValue.value;
+		// Handle RichText objects or objects with a toString() method
+		if (typeof (rawValue as any).toString === 'function') {
+			try {
+				const stringValue = (rawValue as any).toString();
+				if (typeof stringValue === 'string' && stringValue.trim()) {
+					return stringValue;
+				}
+			} catch {
+				// If toString() fails, continue to next check
+			}
+		}
+
+		// Handle objects with a value property
+		if (
+			'value' in rawValue &&
+			typeof rawValue.value === 'string'
+		) {
+			return rawValue.value;
+		}
 	}
 
 	return null;
@@ -100,23 +116,33 @@ const extractTextFromBlocks = (blocks: Block[]): string =>
 
 const getEditorText = (): string => {
 	if (!wp?.data) {
+		console.debug('[Proofreader] wp.data is not available');
 		return '';
 	}
 
 	const blockEditor = wp.data.select('core/block-editor');
 	if (blockEditor) {
 		const blocks = blockEditor.getBlocks();
+		console.debug('[Proofreader] blocks:', blocks.length, blocks);
 		if (blocks.length > 0) {
-			return extractTextFromBlocks(blocks);
+			const text = extractTextFromBlocks(blocks);
+			console.debug('[Proofreader] extractTextFromBlocks result:', JSON.stringify(text));
+			return text;
 		}
+		console.debug('[Proofreader] block editor found but no blocks');
+	} else {
+		console.debug('[Proofreader] core/block-editor not available');
 	}
 
 	const editor = wp.data.select('core/editor');
 	if (!editor) {
+		console.debug('[Proofreader] core/editor not available');
 		return '';
 	}
 
-	return extractPlainText(editor.getEditedPostContent());
+	const postContent = editor.getEditedPostContent();
+	console.debug('[Proofreader] post content:', JSON.stringify(postContent));
+	return extractPlainText(postContent);
 };
 
 const replaceTextInHtml = (
@@ -429,6 +455,7 @@ const initProofreader = (): void => {
 			});
 
 			originalText = getEditorText();
+			console.log(originalText);
 			if (!originalText.trim()) {
 				setStatusHtml(
 					'<p class="nanopress-proofread-error">No content found to proofread.</p>'
