@@ -165,7 +165,11 @@ jobs:
 
       - name: Run PHP static analysis tests
         id: phpstan
-        run: composer phpstan -- -vvv --error-format=checkstyle | cs2pr
+        run: composer phpstan -- --error-format=checkstyle > ./tests/_output/phpstan-report.xml
+
+      - name: Show PHPStan results in PR
+        if: ${{ always() && steps.phpstan.outcome == 'failure' }}
+        run: cs2pr ./tests/_output/phpstan-report.xml
 
       - name: "Save result cache"
         uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
