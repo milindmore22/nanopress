@@ -78,6 +78,6 @@
     "scripts": {
         "format": "phpcbf --standard=phpcs.xml.dist",
         "lint": "phpcs --standard=phpcs.xml.dist",
-        "phpstan": "phpstan analyse --memory-limit=1G --debug"
+        "phpstan": "phpstan analyse --memory-limit=1G"
     }
 }

@@ -29,7 +29,7 @@ parameters:
 		- includes/
 	excludePaths:
 		analyse:
-			- tests/
+			- tests/?
 			- vendor/
 		analyseAndScan:
-			- node_modules/
+			- node_modules/?
