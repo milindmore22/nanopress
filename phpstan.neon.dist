@@ -1,0 +1,35 @@
+parameters:
+	# Rules
+	treatPhpDocTypesAsCertain: false
+	inferPrivatePropertyTypeFromConstructor: true
+	checkExplicitMixedMissingReturn: true
+	checkFunctionNameCase: true
+	checkInternalClassCaseSensitivity: true
+	checkTooWideReturnTypesInProtectedAndPublicMethods: true
+	polluteScopeWithAlwaysIterableForeach: false
+	polluteScopeWithLoopInitialAssignments: false
+	reportAlwaysTrueInLastCondition: true
+	reportStaticMethodSignatures: true
+	reportWrongPhpDocTypeInVarTag: true
+	parallel:
+		maximumNumberOfProcesses: 1
+
+	# Configuration
+	level: 8
+	phpVersion:
+		min: 70200
+		max: 80400
+	bootstrapFiles:
+		- stubs/phpstan-bootstrap.php
+	scanFiles:
+		- vendor/php-stubs/wordpress-stubs/wordpress-stubs.php
+
+	paths:
+		- nanopress.php
+		- includes/
+	excludePaths:
+		analyse:
+			- tests/
+			- vendor/
+		analyseAndScan:
+			- node_modules/

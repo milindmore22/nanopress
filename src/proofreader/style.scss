@@ -42,8 +42,8 @@
 .nanopress-correction-item {
 	display: flex;
 	flex-direction: column;
-	padding: 8px;
 	margin-bottom: 6px;
+	padding: 8px;
 	background-color: #f6f7f7;
 	border: 1px solid #dcdcde;
 	border-radius: 3px;
@@ -60,13 +60,13 @@
 }
 
 .nanopress-correction-original {
-	text-decoration: line-through;
 	color: #d63638;
+	text-decoration: line-through;
 }
 
 .nanopress-correction-arrow {
-	color: #666;
 	margin: 0 2px;
+	color: #666;
 }
 
 .nanopress-correction-suggestion {
@@ -81,8 +81,8 @@
 
 .nanopress-correction-accept,
 .nanopress-correction-ignore {
-	font-size: 12px;
 	padding: 2px 8px;
+	font-size: 12px;
 }
 
 .nanopress-correction-accepted {

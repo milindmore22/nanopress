@@ -1,0 +1,50 @@
+# Development and testing files
+/.github
+/node_modules
+/tests
+/bin
+/.editorconfig
+/.eslintignore
+/.eslintrc.cjs
+/.gitignore
+/.distignore
+/phpcs.xml.dist
+/phpstan.neon.dist
+/composer.json
+/composer.lock
+/package.json
+/package-lock.json
+/README.md
+/vendor
+/.nvmrc
+
+# Runtime source that should not be distributed as standalone files
+/src
+/stubs
+/webpack.config.js
+/tsconfig.json
+
+# Duplicate packaged folder and archives
+/nanopress
+/nanopress.zip
+*.zip
+
+# Auto-generated cache files
+.phpcs-cache
+
+# Git files
+.git
+.gitignore
+.gitattributes
+
+# IDE files
+.vscode
+.idea
+*.sublime-project
+*.sublime-workspace
+
+# OS junk
+.DS_Store
+._*
+Thumbs.db
+desktop.ini

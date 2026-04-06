@@ -12,7 +12,7 @@ NanoPress is an experimental WordPress plugin that enhances content management b
 
 ## Installation
 1. Download the plugin from the WordPress plugin repository or GitHub.
-2. Upload the plugin files to the `/wp-content/plugins/nano-press/` directory.
+2. Upload the plugin files to the `/wp-content/plugins/nanopress/` directory.
 3. Activate the plugin through the 'Plugins' menu in WordPress.
 4. Configure the plugin settings as needed.
 

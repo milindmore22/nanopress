@@ -1,0 +1,83 @@
+{
+    "name": "milindmore22/nanopress",
+    "description": "Experimental WordPress plugin that uses browser built-in AI APIs for translation, summarization, and proofreading.",
+    "license": "GPL-2.0-or-later",
+    "keywords": [
+        "ai",
+        "browser-ai",
+        "translation",
+        "summarizer",
+        "proofreader",
+        "wordpress",
+        "on-device-ai"
+    ],
+    "authors": [
+        {
+	            "name": "milindmore22",
+	            "homepage": "https://github.com/milindmore22"
+        }
+    ],
+    "homepage": "https://github.com/milindmore22/nanopress",
+    "support": {
+	        "issues": "https://github.com/milindmore22/nanopress/issues",
+	        "source": "https://github.com/milindmore22/nanopress"
+    },
+    "require": {
+	        "php": ">=7.2"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://wpackagist.org",
+            "only": [
+                "wpackagist-plugin/*",
+                "wpackagist-theme/*"
+            ]
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "NanoPress\\": "includes/"
+        }
+    },
+    "require-dev": {
+        "automattic/vipwpcs": "^3.0",
+        "composer/installers": "^2.3",
+        "dealerdirect/phpcodesniffer-composer-installer": "^1.0",
+        "php-stubs/wordpress-stubs": "^6.8",
+        "phpcompatibility/php-compatibility": "^10.0.0-alpha",
+        "phpcompatibility/phpcompatibility-wp": "^3.0.0-alpha",
+        "phpstan/extension-installer": "^1.3",
+        "phpstan/phpstan": "^2.1.22",
+        "phpstan/phpstan-deprecation-rules": "^2.0.3",
+        "szepeviktor/phpstan-wordpress": "^2.0.2",
+        "slevomat/coding-standard": "^8.0",
+        "squizlabs/php_codesniffer": "^3.9",
+        "wp-coding-standards/wpcs": "^3.1",
+        "wpackagist-plugin/plugin-check": "~1.6.0"
+    },
+    "config": {
+        "allow-plugins": {
+            "composer/installers": true,
+            "dealerdirect/phpcodesniffer-composer-installer": true,
+            "php-http/discovery": true,
+            "phpstan/extension-installer": true
+        },
+        "optimize-autoloader": true,
+        "sort-packages": true
+    },
+    "extra": {
+        "installer-paths": {
+            "vendor/{$vendor}/{$name}/": [
+                "wpackagist-plugin/plugin-check"
+            ]
+        }
+    },
+    "scripts": {
+        "format": "phpcbf --standard=phpcs.xml.dist",
+        "lint": "phpcs --standard=phpcs.xml.dist",
+        "phpstan": "phpstan analyse --memory-limit=1G --debug"
+    }
+}
