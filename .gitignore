@@ -32,6 +32,7 @@ CLAUDE.md
 
 # Cache
 .phpunit.result.cache
+.phpcs-cache
 
 # Test output
 /tests/_output/*

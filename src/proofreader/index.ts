@@ -42,6 +42,14 @@ declare const wp:
 
 const CONTENT_KEYS = ['content', 'citation', 'value', 'text'] as const;
 
+const escapeHtml = (text: string): string =>
+	text
+		.replaceAll('&', '&amp;')
+		.replaceAll('<', '&lt;')
+		.replaceAll('>', '&gt;')
+		.replaceAll('"', '&quot;')
+		.replaceAll("'", '&#039;');
+
 const getSuggestionText = (correction: ProofreaderCorrection): string =>
 	correction.correction ??
 	correction.suggestion ??
@@ -60,10 +68,7 @@ const getAttributeHtml = (rawValue: unknown): string | null => {
 		return rawValue;
 	}
 
-	if (
-		rawValue &&
-		typeof rawValue === 'object'
-	) {
+	if (rawValue && typeof rawValue === 'object') {
 		// Handle RichText objects or objects with a toString() method
 		if (typeof (rawValue as any).toString === 'function') {
 			try {
@@ -77,10 +82,7 @@ const getAttributeHtml = (rawValue: unknown): string | null => {
 		}
 
 		// Handle objects with a value property
-		if (
-			'value' in rawValue &&
-			typeof rawValue.value === 'string'
-		) {
+		if ('value' in rawValue && typeof rawValue.value === 'string') {
 			return rawValue.value;
 		}
 	}
@@ -116,32 +118,23 @@ const extractTextFromBlocks = (blocks: Block[]): string =>
 
 const getEditorText = (): string => {
 	if (!wp?.data) {
-		console.debug('[Proofreader] wp.data is not available');
 		return '';
 	}
 
 	const blockEditor = wp.data.select('core/block-editor');
 	if (blockEditor) {
 		const blocks = blockEditor.getBlocks();
-		console.debug('[Proofreader] blocks:', blocks.length, blocks);
 		if (blocks.length > 0) {
-			const text = extractTextFromBlocks(blocks);
-			console.debug('[Proofreader] extractTextFromBlocks result:', JSON.stringify(text));
-			return text;
+			return extractTextFromBlocks(blocks);
 		}
-		console.debug('[Proofreader] block editor found but no blocks');
-	} else {
-		console.debug('[Proofreader] core/block-editor not available');
 	}
 
 	const editor = wp.data.select('core/editor');
 	if (!editor) {
-		console.debug('[Proofreader] core/editor not available');
 		return '';
 	}
 
 	const postContent = editor.getEditedPostContent();
-	console.debug('[Proofreader] post content:', JSON.stringify(postContent));
 	return extractPlainText(postContent);
 };
 
@@ -455,7 +448,6 @@ const initProofreader = (): void => {
 			});
 
 			originalText = getEditorText();
-			console.log(originalText);
 			if (!originalText.trim()) {
 				setStatusHtml(
 					'<p class="nanopress-proofread-error">No content found to proofread.</p>'
@@ -486,7 +478,7 @@ const initProofreader = (): void => {
 			const message =
 				error instanceof Error ? error.message : 'Unknown error';
 			setStatusHtml(
-				`<p class="nanopress-proofread-error">An error occurred while proofreading: ${message}</p>`
+				`<p class="nanopress-proofread-error">An error occurred while proofreading: ${escapeHtml(message)}</p>`
 			);
 		} finally {
 			proofreadButton.disabled = false;

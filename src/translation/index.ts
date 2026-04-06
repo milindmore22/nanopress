@@ -5,6 +5,17 @@ const translateDropdown = document.getElementById(
 ) as HTMLSelectElement | null;
 const statusElement = document.getElementById('status');
 const htmlElement = document.documentElement;
+const languageSelectorContainer = document.getElementById(
+	'ai-translator-language-selector'
+);
+
+const escapeHtml = (text: string): string =>
+	text
+		.replaceAll('&', '&amp;')
+		.replaceAll('<', '&lt;')
+		.replaceAll('>', '&gt;')
+		.replaceAll('"', '&quot;')
+		.replaceAll("'", '&#039;');
 
 const setStatus = (message: string, useHtml = false): void => {
 	if (!statusElement) {
@@ -62,7 +73,12 @@ const findTextNodes = (node: Node): Text[] => {
 		return [];
 	}
 
-	if (node === translateDropdown || node === statusElement) {
+	// Exclude the entire language selector container and all its descendants
+	if (
+		languageSelectorContainer &&
+		(node === languageSelectorContainer ||
+			languageSelectorContainer.contains(node as Node))
+	) {
 		return [];
 	}
 
@@ -134,17 +150,35 @@ const handleTranslation = async (): Promise<void> => {
 
 		setStatus(`Translating ${textNodes.length} text fragments...`);
 
-		for (const textNode of textNodes) {
-			const currentValue = textNode.nodeValue ?? '';
-			textNode.nodeValue = await translator.translate(currentValue);
+		const BATCH_SIZE = 10;
+		const translatedValues: string[] = [];
+
+		for (let i = 0; i < textNodes.length; i += BATCH_SIZE) {
+			const batch = textNodes.slice(i, i + BATCH_SIZE);
+			const batchResults = await Promise.all(
+				batch.map((textNode) =>
+					translator.translate(textNode.nodeValue ?? '')
+				)
+			);
+			translatedValues.push(...batchResults);
+			setStatus(
+				`Translating... ${Math.min(i + BATCH_SIZE, textNodes.length)}/${textNodes.length}`
+			);
 		}
+
+		textNodes.forEach((textNode, index) => {
+			textNode.nodeValue = translatedValues[index] ?? textNode.nodeValue;
+		});
 
 		htmlElement.lang = selectedLanguage;
 		setStatus('Translation complete.');
 	} catch (error) {
 		const message =
 			error instanceof Error ? error.message : 'Unknown error';
-		setStatus(`<strong>An error occurred:</strong><br>${message}`, true);
+		setStatus(
+			`<strong>An error occurred:</strong><br>${escapeHtml(message)}`,
+			true
+		);
 	} finally {
 		translateDropdown.disabled = false;
 		translateDropdown.classList.remove('opacity-50', 'cursor-not-allowed');

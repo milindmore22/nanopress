@@ -2,6 +2,14 @@ const summaryOutput = document.getElementById('summary-result');
 const articleContent =
 	document.querySelector<HTMLElement>('main') ?? document.body;
 
+const getArticleText = (): string => {
+	const clone = articleContent.cloneNode(true) as HTMLElement;
+	const summaryEl = clone.querySelector('#summary-result');
+	const containerEl = summaryEl?.closest('.nanopress-ai-summary-container');
+	(containerEl ?? summaryEl)?.remove();
+	return clone.innerText;
+};
+
 const updateSummaryClasses = (...classes: string[]): void => {
 	if (!summaryOutput) {
 		return;
@@ -46,7 +54,7 @@ const detectPageLanguage = async (): Promise<string> => {
 		return 'en';
 	}
 
-	const contentText = articleContent.innerText ?? '';
+	const contentText = getArticleText();
 	if (!contentText.trim()) {
 		return 'en';
 	}
@@ -69,7 +77,7 @@ const summarizeContent = async (options: SummarizerOptions): Promise<void> => {
 	const summarizer = await window.Summarizer.create(options);
 	setSummaryHtml('Generating summary...');
 
-	const summary = await summarizer.summarize(articleContent.innerText);
+	const summary = await summarizer.summarize(getArticleText());
 	const formattedSummary = escapeHtml(summary).replaceAll('\n', '<br />');
 
 	setSummaryHtml(`<div>${formattedSummary}</div>`);
@@ -117,7 +125,7 @@ const renderDownloadPrompt = (options: SummarizerOptions): void => {
 							? error.message
 							: 'Unknown error';
 					setSummaryHtml(
-						`<p>An error occurred while downloading or using the model: ${message}</p>`
+						`<p>An error occurred while downloading or using the model: ${escapeHtml(message)}</p>`
 					);
 					updateSummaryClasses(
 						'bg-red-50',
@@ -166,6 +174,10 @@ const initializeSummarizer = async (): Promise<void> => {
 		const sourceLanguage = await detectPageLanguage();
 		setSummaryHtml('Checking summarization model availability...');
 
+		// Update options to use the detected source language
+		options.expectedInputLanguages = [sourceLanguage];
+		options.expectedContextLanguages = [sourceLanguage];
+
 		const availability = await window.Summarizer.availability({
 			expectedInputLanguages: [sourceLanguage],
 			outputLanguage: options.outputLanguage,
@@ -208,7 +220,7 @@ const initializeSummarizer = async (): Promise<void> => {
 		const message =
 			error instanceof Error ? error.message : 'Unknown error';
 		setSummaryHtml(
-			`<p>An error occurred while trying to generate the summary: ${message}</p>`
+			`<p>An error occurred while trying to generate the summary: ${escapeHtml(message)}</p>`
 		);
 		updateSummaryClasses('bg-red-50', 'border-red-400', 'text-red-800');
 	}
