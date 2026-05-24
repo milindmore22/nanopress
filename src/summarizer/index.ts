@@ -1,7 +1,12 @@
+/* Grab the summary output container and the article content area. */
 const summaryOutput = document.getElementById('summary-result');
 const articleContent =
 	document.querySelector<HTMLElement>('main') ?? document.body;
 
+/*
+ * Get the article text, making sure to exclude the summary UI itself
+ * so we don't summarize our own output.
+ */
 const getArticleText = (): string => {
 	const clone = articleContent.cloneNode(true) as HTMLElement;
 	const summaryEl = clone.querySelector('#summary-result');
@@ -10,6 +15,7 @@ const getArticleText = (): string => {
 	return clone.innerText;
 };
 
+/* Swap out the summary box's visual style — info, warning, error, or neutral. */
 const updateSummaryClasses = (...classes: string[]): void => {
 	if (!summaryOutput) {
 		return;
@@ -35,12 +41,14 @@ const updateSummaryClasses = (...classes: string[]): void => {
 	}
 };
 
+/* Write HTML into the summary output box. */
 const setSummaryHtml = (html: string): void => {
 	if (summaryOutput) {
 		summaryOutput.innerHTML = html;
 	}
 };
 
+/* Basic XSS protection — escape HTML special characters. */
 const escapeHtml = (text: string): string =>
 	text
 		.replaceAll('&', '&amp;')
@@ -49,6 +57,10 @@ const escapeHtml = (text: string): string =>
 		.replaceAll('"', '&quot;')
 		.replaceAll("'", '&#039;');
 
+/*
+ * Try to detect what language the article is written in.
+ * Falls back to 'en' if the API isn't available.
+ */
 const detectPageLanguage = async (): Promise<string> => {
 	if (!window.LanguageDetector) {
 		return 'en';
@@ -69,6 +81,7 @@ const detectPageLanguage = async (): Promise<string> => {
 	}
 };
 
+/* Create a summarizer with the given options and run it against the article. */
 const summarizeContent = async (options: SummarizerOptions): Promise<void> => {
 	if (!window.Summarizer || !summaryOutput) {
 		return;
@@ -83,6 +96,9 @@ const summarizeContent = async (options: SummarizerOptions): Promise<void> => {
 	setSummaryHtml(`<div>${formattedSummary}</div>`);
 };
 
+/*
+ * The model isn't downloaded yet — show a prompt with a download button.
+ */
 const renderDownloadPrompt = (options: SummarizerOptions): void => {
 	if (!summaryOutput) {
 		return;
@@ -105,6 +121,7 @@ const renderDownloadPrompt = (options: SummarizerOptions): void => {
 		'text-yellow-800'
 	);
 
+	/* When the user clicks download, trigger the summarization (which will download the model as needed). */
 	document
 		.getElementById('download-model-btn')
 		?.addEventListener('click', () => {
@@ -137,6 +154,10 @@ const renderDownloadPrompt = (options: SummarizerOptions): void => {
 		});
 };
 
+/*
+ * Main setup: check if the Summarizer API is available, detect the article
+ * language, then either summarize or prompt the user to download the model.
+ */
 const initializeSummarizer = async (): Promise<void> => {
 	if (!summaryOutput) {
 		return;
@@ -158,6 +179,7 @@ const initializeSummarizer = async (): Promise<void> => {
 		expectedContextLanguages: ['en'],
 		expectedInputLanguages: ['en'],
 		outputLanguage: 'en',
+		/* Show download progress when the model needs to be fetched. */
 		monitor(monitor) {
 			monitor.addEventListener('downloadprogress', (event: Event) => {
 				const progressEvent = event as Event & { loaded?: number };
@@ -174,7 +196,6 @@ const initializeSummarizer = async (): Promise<void> => {
 		const sourceLanguage = await detectPageLanguage();
 		setSummaryHtml('Checking summarization model availability...');
 
-		// Update options to use the detected source language
 		options.expectedInputLanguages = [sourceLanguage];
 		options.expectedContextLanguages = [sourceLanguage];
 
@@ -226,6 +247,7 @@ const initializeSummarizer = async (): Promise<void> => {
 	}
 };
 
+/* Start once the page has loaded. */
 document.addEventListener('DOMContentLoaded', () => {
 	void initializeSummarizer();
 });
