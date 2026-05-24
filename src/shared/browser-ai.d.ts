@@ -1,3 +1,8 @@
+/*
+ * Type declarations for browser-native AI APIs (Language Detector, Summarizer,
+ * Translator, Proofreader). These are built-in browser APIs, not something we
+ * ship — we're just telling TypeScript what shape they have.
+ */
 declare global {
 	interface Window {
 		LanguageDetector?: LanguageDetectorConstructor;
@@ -6,6 +11,7 @@ declare global {
 		Translator?: TranslatorConstructor;
 	}
 
+	/* A single correction the proofreader suggests — wrong word position + what to replace it with. */
 	interface ProofreaderCorrection {
 		startIndex: number;
 		endIndex: number;
@@ -14,6 +20,7 @@ declare global {
 		replacement?: string;
 	}
 
+	/* The result you get back after proofreading some text — a list of corrections. */
 	interface ProofreaderResult {
 		corrections?: ProofreaderCorrection[];
 	}
@@ -50,6 +57,7 @@ declare global {
 
 	interface SummarizerMonitor extends EventTarget {}
 
+	/* Options you pass when creating a summarizer — tells it the type of summary, length, language, etc. */
 	interface SummarizerOptions {
 		sharedContext: string;
 		type: string;
@@ -76,6 +84,7 @@ declare global {
 		create( options: SummarizerOptions ): Promise<SummarizerInstance>;
 	}
 
+	/* These live at the global scope (not on window) per the spec. */
 	const Proofreader: ProofreaderConstructor | undefined;
 	const Translator: TranslatorConstructor | undefined;
 	const LanguageDetector: LanguageDetectorConstructor | undefined;

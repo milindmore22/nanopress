@@ -1,13 +1,16 @@
 import './style.scss';
 
+/* Simple type for block attributes — we don't know the exact shape, so keep it flexible. */
 type BlockAttributes = Record<string, unknown>;
 
+/* A single block in the editor: has an ID, optional attributes, and optional nested children. */
 interface Block {
 	clientId: string;
 	attributes?: BlockAttributes;
 	innerBlocks?: Block[];
 }
 
+/* The parts of the block-editor store we actually use. */
 interface BlockEditorSelect {
 	getBlocks: () => Block[];
 }
@@ -23,6 +26,7 @@ interface BlockEditorDispatch {
 	) => void;
 }
 
+/* The wp.data object that gives us access to the editor stores. */
 interface WpData {
 	select: ((
 		storeName: 'core/block-editor'
@@ -40,8 +44,10 @@ declare const wp:
 	  }
 	| undefined;
 
+/* These are the attribute keys we look through when searching a block's content. */
 const CONTENT_KEYS = ['content', 'citation', 'value', 'text'] as const;
 
+/* Make sure we don't accidentally inject HTML — escape special characters. */
 const escapeHtml = (text: string): string =>
 	text
 		.replaceAll('&', '&amp;')
@@ -50,12 +56,14 @@ const escapeHtml = (text: string): string =>
 		.replaceAll('"', '&quot;')
 		.replaceAll("'", '&#039;');
 
+/* The API uses different names for the replacement text, so try them all. */
 const getSuggestionText = (correction: ProofreaderCorrection): string =>
 	correction.correction ??
 	correction.suggestion ??
 	correction.replacement ??
 	'';
 
+/* Strip HTML tags and just get the readable text out. */
 const extractPlainText = (html: string): string => {
 	const parser = new DOMParser();
 	const documentNode = parser.parseFromString(html, 'text/html');
@@ -63,13 +71,16 @@ const extractPlainText = (html: string): string => {
 	return documentNode.body.textContent ?? '';
 };
 
+/*
+ * Block attributes can be strings, RichText objects, or objects with a value prop.
+ * This function tries to pull an HTML string out of any of those shapes.
+ */
 const getAttributeHtml = (rawValue: unknown): string | null => {
 	if (typeof rawValue === 'string') {
 		return rawValue;
 	}
 
 	if (rawValue && typeof rawValue === 'object') {
-		// Handle RichText objects or objects with a toString() method
 		if (typeof (rawValue as any).toString === 'function') {
 			try {
 				const stringValue = (rawValue as any).toString();
@@ -77,11 +88,10 @@ const getAttributeHtml = (rawValue: unknown): string | null => {
 					return stringValue;
 				}
 			} catch {
-				// If toString() fails, continue to next check
+				/* toString() can throw for some objects — just move on. */
 			}
 		}
 
-		// Handle objects with a value property
 		if ('value' in rawValue && typeof rawValue.value === 'string') {
 			return rawValue.value;
 		}
@@ -90,6 +100,10 @@ const getAttributeHtml = (rawValue: unknown): string | null => {
 	return null;
 };
 
+/*
+ * Walk through all blocks (and their children) and grab the text content.
+ * Joins everything together with newlines so the proofreader can work on it.
+ */
 const extractTextFromBlocks = (blocks: Block[]): string =>
 	blocks
 		.flatMap((block) => {
@@ -116,6 +130,9 @@ const extractTextFromBlocks = (blocks: Block[]): string =>
 		})
 		.join('\n');
 
+/*
+ * Get all the text from the editor — tries the block editor first, falls back to the classic editor.
+ */
 const getEditorText = (): string => {
 	if (!wp?.data) {
 		return '';
@@ -138,6 +155,10 @@ const getEditorText = (): string => {
 	return extractPlainText(postContent);
 };
 
+/*
+ * Find an exact string inside HTML and replace it. Works on raw text nodes,
+ * so it doesn't mess up HTML tags or attributes.
+ */
 const replaceTextInHtml = (
 	html: string,
 	originalSegment: string,
@@ -174,6 +195,10 @@ const replaceTextInHtml = (
 	return null;
 };
 
+/*
+ * Walk through all blocks and swap out the old text for the new one.
+ * Returns true once it finds and replaces something.
+ */
 const updateBlocksText = (
 	blocks: Block[],
 	originalSegment: string,
@@ -218,6 +243,7 @@ const updateBlocksText = (
 	return false;
 };
 
+/* Find the text in the editor and replace it with the corrected version. */
 const applyCorrection = (
 	originalSegment: string,
 	replacement: string
@@ -241,6 +267,10 @@ const applyCorrection = (
 	);
 };
 
+/*
+ * Wire up the proofreader UI: the proofread button, status messages, the panel
+ * showing corrections, and the accept-all button. This is the main entry point.
+ */
 const initProofreader = (): void => {
 	const proofreadButton = document.getElementById(
 		'nanopress-proofread-btn'
@@ -486,10 +516,12 @@ const initProofreader = (): void => {
 		}
 	};
 
+	/* Click the proofread button to start checking the content. */
 	proofreadButton.addEventListener('click', () => {
 		void handleProofread();
 	});
 
+	/* Accept every suggestion at once — batch-apply all corrections. */
 	acceptAllButton?.addEventListener('click', () => {
 		applyAllCorrections();
 		correctionsElement
@@ -511,6 +543,7 @@ const initProofreader = (): void => {
 	});
 };
 
+/* Start as soon as the DOM is ready, whether through wp.domReady or the native event. */
 if (wp?.domReady) {
 	wp.domReady(initProofreader);
 } else {

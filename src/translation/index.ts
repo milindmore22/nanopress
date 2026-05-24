@@ -1,5 +1,9 @@
 import './style.scss';
 
+/*
+ * Grab the language dropdown, status display, and the language selector
+ * container from the page.
+ */
 const translateDropdown = document.getElementById(
 	'language-dropdown'
 ) as HTMLSelectElement | null;
@@ -9,6 +13,7 @@ const languageSelectorContainer = document.getElementById(
 	'ai-translator-language-selector'
 );
 
+/* Escape HTML special characters so we don't accidentally inject unsafe content. */
 const escapeHtml = (text: string): string =>
 	text
 		.replaceAll('&', '&amp;')
@@ -17,6 +22,7 @@ const escapeHtml = (text: string): string =>
 		.replaceAll('"', '&quot;')
 		.replaceAll("'", '&#039;');
 
+/* Show a status message — either plain text or HTML. */
 const setStatus = (message: string, useHtml = false): void => {
 	if (!statusElement) {
 		return;
@@ -30,6 +36,7 @@ const setStatus = (message: string, useHtml = false): void => {
 	statusElement.textContent = message;
 };
 
+/* Use the browser's Language Detector API to figure out what language the page is in. */
 const detectLanguage = async (): Promise<string | null> => {
 	if (!window.LanguageDetector || !statusElement) {
 		return null;
@@ -58,6 +65,10 @@ const detectLanguage = async (): Promise<string | null> => {
 	}
 };
 
+/*
+ * Walk the DOM and collect text nodes we can translate.
+ * Skips script/style tags, buttons, SVG, code blocks, and the language selector itself.
+ */
 const findTextNodes = (node: Node): Text[] => {
 	const excludedTags = [
 		'SCRIPT',
@@ -73,7 +84,7 @@ const findTextNodes = (node: Node): Text[] => {
 		return [];
 	}
 
-	// Exclude the entire language selector container and all its descendants
+	/* Don't translate the language picker UI itself. */
 	if (
 		languageSelectorContainer &&
 		(node === languageSelectorContainer ||
@@ -90,6 +101,7 @@ const findTextNodes = (node: Node): Text[] => {
 	return Array.from(node.childNodes).flatMap(findTextNodes);
 };
 
+/* When the user picks a language from the dropdown, kick off the translation. */
 const handleTranslation = async (): Promise<void> => {
 	if (!translateDropdown || !statusElement) {
 		return;
@@ -150,6 +162,7 @@ const handleTranslation = async (): Promise<void> => {
 
 		setStatus(`Translating ${textNodes.length} text fragments...`);
 
+		/* Translate in small batches to avoid overwhelming the API and to show progress. */
 		const BATCH_SIZE = 10;
 		const translatedValues: string[] = [];
 
@@ -166,6 +179,7 @@ const handleTranslation = async (): Promise<void> => {
 			);
 		}
 
+		/* Swap each text node with its translation. */
 		textNodes.forEach((textNode, index) => {
 			textNode.nodeValue = translatedValues[index] ?? textNode.nodeValue;
 		});
@@ -185,6 +199,7 @@ const handleTranslation = async (): Promise<void> => {
 	}
 };
 
+/* On page load, try to detect the current language and pre-select it in the dropdown. */
 const initializeDetectedLanguage = async (): Promise<void> => {
 	if (!translateDropdown || !statusElement) {
 		return;
@@ -217,6 +232,7 @@ const initializeDetectedLanguage = async (): Promise<void> => {
 	}
 };
 
+/* When the user selects a different language, start translating. */
 if (translateDropdown) {
 	translateDropdown.addEventListener('change', () => {
 		void handleTranslation();
